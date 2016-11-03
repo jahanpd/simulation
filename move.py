@@ -3,6 +3,8 @@ from random import randint
 
 def move_genome(List, Plane):
     _Pop = []
+    _X = []
+    _Y = []
     for Organism in List:
         X = int(Organism[-19:-10])
         Y = int(Organism[-9:])
@@ -15,8 +17,10 @@ def move_genome(List, Plane):
         Genome = (Organism[0:200] + 'x' + str(NewX).zfill(9) + 'y' +
                                     str(NewY).zfill(9))
         _Pop.append(Genome)
+        _X.append(NewX)
+        _Y.append(NewY)
 
-    return _Pop
+    return _Pop, _X, _Y
 
 
 def move_predator(List, Plane):

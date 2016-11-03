@@ -6,7 +6,7 @@ from predate import predate
 
 def run(Population, Predators, Plane, Predation):
     Dead = []
-    while len(Population) != 0:
+    while len(Population) < 100:
         _Pop = []
         for Genome in Population:
             Rate = int(Genome[0:100], 2)
@@ -25,9 +25,15 @@ def run(Population, Predators, Plane, Predation):
         Population = _Pop
 
         Population = mate(Population, Plane)
-        Population = move_genome(Population, Plane)
+        Population, X, Y = move_genome(Population, Plane)
         Predators = move_predator(Predators, Plane)
         Population, Died = predate(Population, Predators, Predation)
         Dead = Dead + Died
         print len(Population)
         print len(Dead)
+        _X = open('X.txt', 'w')
+        for In in X:
+            _X.write("%s\n" % In)
+        _Y = open('Y.txt', 'w')
+        for In in Y:
+            _Y.write("%s\n" % In)

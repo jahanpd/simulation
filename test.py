@@ -21,8 +21,6 @@ for n in range(50):
             str(randint(0, Plane)).zfill(9))
     Predators.append(Genome)
 
-print Predators
-
 if __name__ == '__main__':
     Thread(target=run(Population, Predators, Plane, Predation)).start()
     Thread(target=plot(Population)).start()
