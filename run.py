@@ -3,37 +3,22 @@ from mate import mate
 from move import move_genome, move_predator
 from predate import predate
 
+Population = []
+Predators = []
+Plane = 100
+Predation = 1
 
-def run(Population, Predators, Plane, Predation):
-    Dead = []
-    while len(Population) < 100:
-        _Pop = []
-        for Genome in Population:
-            Rate = int(Genome[0:100], 2)
-            Prob = 1./Rate
-            _ = ""
-            for n in Genome:
-                if Prob >= uniform(0, 1):
-                    _ += str(randint(0, 1))
-                else:
-                    _ += n
-            Genome = _
-            Newrate = int(Genome[0:100], 2)
-            if Rate == Newrate:
-                _Pop.append(Genome)
+for n in range(2):
+    Rate = randint(10, 131071) # top number is a string of 17 '1's
+    Gene = bin(Rate)
+    Genome = Gene[2:].zfill(30) + ('0'*10)
+    Genome += "10100" + ('0'*5) # oncogene 1 = 20 base 10 (40-50)
+    Genome += "10100" + ('0'*5) # oncogene 2 (50-60)
+    Genome += str(randint(0, Plane)).zfill(5) # x coord
+    Genome += str(randint(0, Plane)).zfill(5) # y coord
+    Population.append(Genome)
 
-        Population = _Pop
-
-        Population = mate(Population, Plane)
-        Population, X, Y = move_genome(Population, Plane)
-        Predators = move_predator(Predators, Plane)
-        Population, Died = predate(Population, Predators, Predation)
-        Dead = Dead + Died
-        print len(Population)
-        print len(Dead)
-        _X = open('X.txt', 'w')
-        for In in X:
-            _X.write("%s\n" % In)
-        _Y = open('Y.txt', 'w')
-        for In in Y:
-            _Y.write("%s\n" % In)
+for n in range(10):
+    predatorLocation = str(randint(0, Plane)).zfill(5) + \
+        str(randint(0, Plane)).zfill(5)
+    Predators.append(predatorLocation)
