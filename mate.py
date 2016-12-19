@@ -1,22 +1,25 @@
 from random import randint
+import itertools
+from backBone import generatePopulations
 
+Population, Predators = generatePopulations()
 
-def mate(Population, Plane):
+def sex(genomeOne, genomeTwo):
+    locationOne = genomeOne[-10:]
+    locationTwo = genomeTwo[-10:]
+    if locationOne == locationTwo:
+        rateOne = int(genomeOne[13:30],2)
+        rateTwo = int(genomeTwo[13:30],2)
+        newRate = int(rateOne + rateTwo)/2
+        newGene = bin(newRate)
+        newGenome = spawnGenome(newGene)
+        Daughter.append(newGenome)
+
+def mate(Population):
     Daughters = []
-    for Genome1 in Population:
-        XY = Genome1[-20:]
-        Index1 = Population.index(Genome1)
-        for Genome2 in Population:
-            Index2 = Population.index(Genome2)
-            if Index1 != Index2:
-                if XY in Genome2:
-                    Rate1 = int(Genome1[0:100], 2)
-                    Rate2 = int(Genome2[0:100], 2)
-                    Newrate = (Rate1 + Rate2)/2
-                    Gene = bin(Newrate)
-                    Genome = Gene[2:].zfill(100) + ('0'*100)
-                    Genome += 'x' + str(randint(0, Plane)).zfill(9)
-                    Genome += 'y' + str(randint(0, Plane)).zfill(9)
-                    Daughters.append(Genome)
-    _Pop = Population + Daughters
-    return _Pop
+    for a, b in itertools.combinations(Population, 2):
+        sex(a, b)
+    return Daughters
+
+sjsjs = mate(Population)
+print(sjsjs)

@@ -48,7 +48,7 @@ def mutateLoop(Population):
             else:
                 _ += n
         _Pop.append(_ + Genome[60:])
-    Population = _Pop
+    return _Pop
 
 t0 = time.time()
 for n in range(1000):
