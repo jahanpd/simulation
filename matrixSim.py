@@ -3,8 +3,9 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
+# use 1.03 instead for a much harsher pred population curve
 def exponential(x):
-    return int(np.power(1.025, x) + 1)
+    return int(np.power(1.03, x) + 1)
 
 def population(popSize, Plane):
     rateGene = np.random.randint(1,high=1024, size=(popSize,1))
@@ -32,8 +33,11 @@ def probabality(Prob, ifReturn, elReturn):
         return elReturn
 
 def geneSwitch(gene, rate):
+    localRate = rate
+    if localRate == 0:
+        localRate += 1
     oncogenes = gene[0] + gene[1] + gene[2]
-    Prob = 1./rate
+    Prob = 1./localRate
     mutate = ""
     for n in oncogenes:
         mutate += probabality(Prob, str(randint(0,1)), n)
@@ -172,75 +176,102 @@ def popMax(genomes, popMax):
 # b = 1.025
 # c = 1
 
+stats=[]
+for run in range(10):
+    iters = 10000
+    popCap = 200
+    rateAvg1 = []
+    populSize1 = []
+    rateStd1 = []
+    organismMoveRate = 1
+    predationRate = 0.9
+    genomes, predators = population(100,50)
 
-iters = 10000
-popCap = 200
+    for n in range(iters):
+        t0 = time.time()
+        Plane = 50
+        mutate(genomes)
+        move(genomes,organismMoveRate)
+        move(predators, 1)
+        predators = predatorLevels(predators)
+        child = mate(genomes)
+        genomes = procreate(genomes, child)
+        genomes = np.array(filter(cancer, genomes))
+        genomes = np.array(filter(kill, genomes))
+        genomes = popMax(genomes, popCap)
+        if len(genomes) <= 1:
+            break
+        rateAvg1.append(np.mean(genomes[:,0]))
+        rateStd1.append(np.std(genomes[:,0]))
+        populSize1.append(len(genomes))
+        if np.std(genomes[:,0]) == 0:
+             break
+        t1 = time.time()
+        print(n,t1-t0, np.mean(genomes[:,0]), len(genomes), len(predators),\
+                np.max(genomes[:,4]))
 
-rateAvg1 = []
-populSize1 = []
-organismMoveRate = 1
-predationRate = 0.8
-genomes, predators = population(100,50)
+    spread1 = 0
+    if len(genomes) > 1:
+        spread1 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
 
-for n in range(iters):
-    t0 = time.time()
-    Plane = 50
-    mutate(genomes)
-    move(genomes,organismMoveRate)
-    move(predators, 1)
-    predators = predatorLevels(predators)
-    child = mate(genomes)
-    genomes = procreate(genomes, child)
-    genomes = np.array(filter(cancer, genomes))
-    genomes = np.array(filter(kill, genomes))
-    genomes = popMax(genomes, popCap)
-    if len(genomes) <= 1:
-        break
-    rateAvg1.append(np.mean(genomes[:,0]))
-    populSize1.append(len(genomes))
-    t1 = time.time()
-    print(n,t1-t0, Plane, len(genomes), len(predators))
+    organismMoveRate = 1
+    predationRate = 0.1
+    genomes, predators = population(100,50)
+    rateAvg2 = []
+    populSize2 = []
+    rateStd2 = []
 
-spread1 = 0
-if len(genomes) > 1:
-    spread1 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
+    for n in range(iters):
+        t0 = time.time()
+        Plane = 50
+        mutate(genomes)
+        move(genomes,organismMoveRate)
+        move(predators, 1)
+        predators = predatorLevels(predators)
+        child = mate(genomes)
+        genomes = procreate(genomes, child)
+        genomes = np.array(filter(cancer, genomes))
+        genomes = np.array(filter(kill, genomes))
+        genomes = popMax(genomes, popCap)
+        if len(genomes) <= 1:
+            break
+        rateAvg2.append(np.mean(genomes[:,0]))
+        rateStd2.append(np.std(genomes[:,0]))
+        populSize2.append(len(genomes))
+        if np.std(genomes[:,0]) == 0:
+             break
+        t1 = time.time()
+        print(n,t1-t0, np.mean(genomes[:,0]), len(genomes),len(predators),\
+                np.max(genomes[:,4]))
 
-organismMoveRate = 1
-predationRate = 0.4
-genomes, predators = population(100,50)
-rateAvg2 = []
-populSize2 = []
+    spread2 = 0
+    if len(genomes) > 1:
+        spread2 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
 
-for n in range(iters):
-    t0 = time.time()
-    Plane = 50
-    mutate(genomes)
-    move(genomes,organismMoveRate)
-    move(predators, 1)
-    predators = predatorLevels(predators)
-    child = mate(genomes)
-    genomes = procreate(genomes, child)
-    genomes = np.array(filter(cancer, genomes))
-    genomes = np.array(filter(kill, genomes))
-    genomes = popMax(genomes, popCap)
-    if len(genomes) <= 1:
-        break
-    rateAvg2.append(np.mean(genomes[:,0]))
-    populSize2.append(len(genomes))
-    t1 = time.time()
-    print(n,t1-t0, Plane, len(genomes),len(predators))
+    stats.append(rateAvg1[len(rateAvg2)-1])
+    stats.append(spread1[0])
+    stats.append(spread1[1])
 
-spread2 = 0
-if len(genomes) > 1:
-    spread2 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
+    stats.append(rateAvg2[len(rateAvg2)-1])
+    stats.append(spread2[0])
+    stats.append(spread2[1])
 
-print(rateAvg1[len(rateAvg1)-1],spread1)
+    highPred = plt.plot(range(len(rateAvg1)),rateAvg1,'g-', label='high')
+    lowPred = plt.plot(range(len(rateAvg2)), rateAvg2,'r-', label='low')
+    popHigh = plt.plot(range(len(populSize1)), populSize1,'g-')
+    popLow = plt.plot(range(len(populSize2)), populSize2,'r-')
 
-print(rateAvg2[len(rateAvg2)-1],spread2)
+    rateAvg1 = np.array(rateAvg1)
+    rateStd1 = np.array(rateStd1)
+    rateAvg2 = np.array(rateAvg2)
+    rateStd2 = np.array(rateStd2)
+    plt.fill_between(range(len(rateAvg1)),rateAvg1+rateStd1,rateAvg1-rateStd1)
+    plt.fill_between(range(len(rateAvg2)),rateAvg2+rateStd2,rateAvg2-rateStd2)
+    fig1 = plt.gcf()
+    filename = "plot%s.png" % run
+    fig1.savefig(filename)
 
-plt.plot(
-        range(len(rateAvg1)),rateAvg1,'g-',\
-        range(len(rateAvg2)), rateAvg2,'r-', \
-        range(len(populSize1)), populSize1,'g-',\
-        range(len(populSize2)), populSize2,'r-')
-plt.show()
+statsExport = open('stats.txt', 'w')
+for n in stats:
+    statsExport.write("%s," % n)
+statsExport.close()
