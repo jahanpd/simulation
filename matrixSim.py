@@ -3,13 +3,16 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
+def exponential(x):
+    return int(np.power(1.025, x) + 1)
+
 def population(popSize, Plane):
     rateGene = np.random.randint(1,high=1024, size=(popSize,1))
     oncogenes = np.full((popSize,3),20,dtype=np.int)
     location = np.random.randint(Plane+1,size=(popSize,2))
     generation = np.zeros((popSize,1), dtype=np.int)
     genomes = np.concatenate((rateGene,oncogenes,generation,location),axis=1)
-    predators = np.random.randint(Plane+1,size=(int(Predation*popSize),2))
+    predators = np.random.randint(Plane+1,size=((exponential(popSize)),2))
     return genomes, predators
 
 def convertString(gene):
@@ -129,30 +132,32 @@ def cancer(genome):
 def kill(genome):
     location = genome[-2:]
     if location.tolist() in predators.tolist():
-        print("DANGER")
-        return probabality(predationRate, False, True)
+        oncogenes = genome[1:4]
+        oncogeneCount=np.count_nonzero(oncogenes==20)
+        if oncogeneCount == 2:
+            Prob = predationRate
+        else:
+            Prob = predationRate*3
+        return probabality(Prob, False, True)
     else:
         return True
 
-def predatorEndangered(predators):
+def predatorEndangered(predators, predSize):
     _Predators = predators
-    while len(_Predators) < Predation*len(genomes):
+    while len(_Predators) < predSize:
         newp = np.random.randint(Plane+1,size=(1,2))
         _Predators = np.vstack([_Predators, newp])
     return _Predators
 
 def predatorLevels(predators):
-    if len(predators) > Predation*len(genomes):
-        return predators[0:int(Predation*len(genomes))]
-    elif len(predators) < Predation*len(genomes):
-        muchosPred = predatorEndangered(predators)
+    predSize = exponential(len(genomes))
+    if len(predators) > predSize:
+        return predators[0:predSize]
+    elif len(predators) < predSize:
+        muchosPred = predatorEndangered(predators, predSize)
         return muchosPred
-
-def logistic(x):
-    return int(300./(1 + np.exp(-0.025*(float(x)-120))))
-
-def exponential(x):
-    return int(0.5 * np.exp(0.03 * x) + 10)
+    else:
+        return predators
 
 def popMax(genomes, popMax):
     if len(genomes) > popMax:
@@ -161,14 +166,20 @@ def popMax(genomes, popMax):
     else:
         return genomes
 
-iters = 100
+
+# predator population controlled by exp function y = a(b^x)+c where
+# a = 1
+# b = 1.025
+# c = 1
+
+
+iters = 10000
 popCap = 200
 
 rateAvg1 = []
 populSize1 = []
 organismMoveRate = 1
-Predation = 0.01
-predationRate = 0.5
+predationRate = 0.8
 genomes, predators = population(100,50)
 
 for n in range(iters):
@@ -177,7 +188,7 @@ for n in range(iters):
     mutate(genomes)
     move(genomes,organismMoveRate)
     move(predators, 1)
-    predatorLevels(predators)
+    predators = predatorLevels(predators)
     child = mate(genomes)
     genomes = procreate(genomes, child)
     genomes = np.array(filter(cancer, genomes))
@@ -188,14 +199,14 @@ for n in range(iters):
     rateAvg1.append(np.mean(genomes[:,0]))
     populSize1.append(len(genomes))
     t1 = time.time()
-    print(n,t1-t0, Plane, len(genomes))
+    print(n,t1-t0, Plane, len(genomes), len(predators))
 
 spread1 = 0
 if len(genomes) > 1:
     spread1 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
 
 organismMoveRate = 1
-Predation = 0.015
+predationRate = 0.4
 genomes, predators = population(100,50)
 rateAvg2 = []
 populSize2 = []
@@ -206,7 +217,7 @@ for n in range(iters):
     mutate(genomes)
     move(genomes,organismMoveRate)
     move(predators, 1)
-    predatorLevels(predators)
+    predators = predatorLevels(predators)
     child = mate(genomes)
     genomes = procreate(genomes, child)
     genomes = np.array(filter(cancer, genomes))
@@ -230,6 +241,6 @@ print(rateAvg2[len(rateAvg2)-1],spread2)
 plt.plot(
         range(len(rateAvg1)),rateAvg1,'g-',\
         range(len(rateAvg2)), rateAvg2,'r-', \
-        range(len(populSize1)), populSize1,'b-',\
-        range(len(populSize2)), populSize2,'m-')
+        range(len(populSize1)), populSize1,'g-',\
+        range(len(populSize2)), populSize2,'r-')
 plt.show()
