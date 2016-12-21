@@ -36,7 +36,7 @@ def geneSwitch(gene, rate):
     localRate = rate
     if localRate == 0:
         localRate += 1
-    oncogenes = gene[0] + gene[1] + gene[2]
+    oncogenes = gene[0].zfill(5) + gene[1].zfill(5) + gene[2].zfill(5)
     Prob = 1./localRate
     mutate = ""
     for n in oncogenes:
@@ -142,7 +142,7 @@ def kill(genome):
             Prob = predationRate
         else:
             Prob = predationRate*3
-        return probabality(Prob, False, True)
+        return Prob <= uniform(0, 1)
     else:
         return True
 
@@ -176,8 +176,10 @@ def popMax(genomes, popMax):
 # b = 1.025
 # c = 1
 
+iterations = input("how many cycles of the simulation?? ")
+
 stats=[]
-for run in range(10):
+for run in range(iterations):
     iters = 10000
     popCap = 200
     rateAvg1 = []
@@ -248,13 +250,11 @@ for run in range(10):
     if len(genomes) > 1:
         spread2 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
 
-    stats.append(rateAvg1[len(rateAvg2)-1])
-    stats.append(spread1[0])
-    stats.append(spread1[1])
+    stats.append(rateAvg1[len(rateAvg1)-1])
+    stats.append(spread1)
 
     stats.append(rateAvg2[len(rateAvg2)-1])
-    stats.append(spread2[0])
-    stats.append(spread2[1])
+    stats.append(spread2)
 
     highPred = plt.plot(range(len(rateAvg1)),rateAvg1,'g-', label='high')
     lowPred = plt.plot(range(len(rateAvg2)), rateAvg2,'r-', label='low')
@@ -270,6 +270,7 @@ for run in range(10):
     fig1 = plt.gcf()
     filename = "plot%s.png" % run
     fig1.savefig(filename)
+    plt.close()
 
 statsExport = open('stats.txt', 'w')
 for n in stats:
