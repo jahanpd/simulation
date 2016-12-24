@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # use 1.03 instead for a much harsher pred population curve
 def exponential(x):
-    return int(np.power(1.03, x) + 1)
+    return int(np.power(1.04, x) + 1)
 
 def population(popSize, Plane):
     rateGene = np.random.randint(1,high=1024, size=(popSize,1))
@@ -186,12 +186,12 @@ for run in range(iterations):
     populSize1 = []
     rateStd1 = []
     organismMoveRate = 1
-    predationRate = 0.9
+    predationRate = 0.45
     genomes, predators = population(100,50)
 
     for n in range(iters):
         t0 = time.time()
-        Plane = 50
+        Plane = int(0.5*len(genomes))
         mutate(genomes)
         move(genomes,organismMoveRate)
         move(predators, 1)
@@ -209,7 +209,7 @@ for run in range(iterations):
         if np.std(genomes[:,0]) == 0:
              break
         t1 = time.time()
-        print(n,t1-t0, np.mean(genomes[:,0]), len(genomes), len(predators),\
+        print(run,n,t1-t0, np.mean(genomes[:,0]), len(genomes), len(predators),\
                 np.max(genomes[:,4]))
 
     spread1 = 0
@@ -217,7 +217,7 @@ for run in range(iterations):
         spread1 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
 
     organismMoveRate = 1
-    predationRate = 0.1
+    predationRate = 0.15
     genomes, predators = population(100,50)
     rateAvg2 = []
     populSize2 = []
@@ -225,7 +225,7 @@ for run in range(iterations):
 
     for n in range(iters):
         t0 = time.time()
-        Plane = 50
+        Plane = int(0.5*len(genomes))
         mutate(genomes)
         move(genomes,organismMoveRate)
         move(predators, 1)
@@ -243,7 +243,7 @@ for run in range(iterations):
         if np.std(genomes[:,0]) == 0:
              break
         t1 = time.time()
-        print(n,t1-t0, np.mean(genomes[:,0]), len(genomes),len(predators),\
+        print(run,n,t1-t0, np.mean(genomes[:,0]), len(genomes),len(predators),\
                 np.max(genomes[:,4]))
 
     spread2 = 0
