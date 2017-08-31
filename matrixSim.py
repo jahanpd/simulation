@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 
 # use 1.03 instead for a much harsher pred population curve
 def exponential(x):
-    return int(np.power(1.04, x) + 1)
+    return int(np.power(1.015, x) + 1)
 
 def population(popSize, Plane):
-    rateGene = np.random.randint(1,high=1024, size=(popSize,1))
+    rateGene1 = np.random.randint(1,high=1024, size=(popSize,1))
+    rateGene2 = np.random.randint(1,high=1024, size=(popSize,1))
     oncogenes = np.full((popSize,3),20,dtype=np.int)
     location = np.random.randint(Plane+1,size=(popSize,2))
     generation = np.zeros((popSize,1), dtype=np.int)
-    genomes = np.concatenate((rateGene,oncogenes,generation,location),axis=1)
+    genomes = np.concatenate((rateGene1,rateGene2,oncogenes,generation,location),axis=1)
     predators = np.random.randint(Plane+1,size=((exponential(popSize)),2))
     return genomes, predators
 
@@ -45,14 +46,20 @@ def geneSwitch(gene, rate):
     gene[1] = mutate[5:10]
     gene[2] = mutate[10:]
 
+def meanRates(rates):
+    meanrates = np.array([],dtype=int)
+    for rate in rates:
+        meanrates = np.append(meanrates, int(np.mean(rate)))
+    return meanrates
+
 def mutate(genomes):
-    rates = genomes[:,0]
-    oncogenes = genomes[:,1:4]
+    rates = meanRates(genomes[:,0:2])
+    oncogenes = genomes[:,2:5]
     stringConvert = np.vectorize(convertString)
     out = stringConvert(oncogenes)
     map(geneSwitch,out,rates)
     intConvert = np.vectorize(convertInt)
-    genomes[:,1:4] = intConvert(out)
+    genomes[:,2:5] = intConvert(out)
 
 def shift(coord, Prob):
     newCoord = probabality(Prob, randint(coord-1,coord+1), coord)
@@ -73,35 +80,38 @@ def checkLength(rate):
     else:
         return rate
 
-def inheritance(rate1, rate2):
-    rate1 = checkLength(convertString(rate1))
-    rate2 = checkLength(convertString(rate2))
-    newRate1 = convertInt(rate1[:5] + rate2[5:])
-    newRate2 = convertInt(rate2[:5] + rate1[5:])
-    return probabality(0.5, newRate1, newRate2)
+def inheritance(rate1a, rate1b, rate2a, rate2b):
+    randprob = uniform(0, 1)
+    if 0.25 >= randprob:
+        return rate1a, rate2a
+    elif 0.5 >= randprob:
+        return rate1a, rate2b
+    elif 0.75 >= randprob:
+        return rate1b, rate2a
+    elif 1 >= randprob:
+        return rate1b, rate2b
 
-
-def daughter(genome1, genome2, newRate):
-    maxGen = np.amax(np.array([genome1[4],genome2[4]]))
-    return np.array([newRate,20,20,20,maxGen+1,randint(0, Plane),randint(0, Plane)])
+def daughter(genome1, genome2, newRate1, newRate2):
+    maxGen = np.amax(np.array([genome1[5],genome2[5]]))
+    return np.array([newRate1,newRate2,20,20,20,maxGen+1,randint(0, Plane),randint(0, Plane)])
 
 def sex(genome1, genome2):
     a = genome1[-2:]
     b = genome2[-2:]
     if (a==b).all():
-        og1 = genome1[1:4]
-        og2 = genome2[1:4]
+        og1 = genome1[2:5]
+        og2 = genome2[2:5]
         oncogeneCount = np.count_nonzero(og1==20) + np.count_nonzero(og2==20)
         if oncogeneCount == 2:
             fertility = 1
-            newRate = inheritance(genome1[0],genome2[0])
-            return daughter(genome1, genome2, newRate)
+            newRate1, newRate2 = inheritance(genome1[0], genome1[1], genome2[0], genome2[1])
+            return daughter(genome1, genome2, newRate1, newRate2)
         elif oncogeneCount == 3:
             fertility = 3
-            progArray = np.empty([3,7], dtype=np.int)
+            progArray = np.empty([3,8], dtype=np.int)
             for n in range(fertility):
-                newRate = inheritance(genome1[0],genome2[0])
-                progeny = daughter(genome1, genome2, newRate)
+                newRate1, newRate2 = inheritance(genome1[0], genome1[1], genome2[0], genome2[1])
+                progeny = daughter(genome1, genome2, newRate1, newRate2)
                 progArray[n] = progeny
             return progArray
         else:
@@ -110,7 +120,7 @@ def sex(genome1, genome2):
         return []
 
 def mate(genomes):
-    daughterArray = np.zeros([1,7], dtype=np.int)
+    daughterArray = np.zeros([1,8], dtype=np.int)
     for i in range(len(genomes)):
         for j in range(i+1, len(genomes)):
             progeny = sex(genomes[i],genomes[j])
@@ -126,7 +136,7 @@ def procreate(genomes, children):
         return genomes
 
 def cancer(genome):
-    oncogenes = genome[1:4]
+    oncogenes = genome[2:5]
     oncogeneCount=np.count_nonzero(oncogenes==20)
     if oncogeneCount==0:
         return False
@@ -136,7 +146,7 @@ def cancer(genome):
 def kill(genome):
     location = genome[-2:]
     if location.tolist() in predators.tolist():
-        oncogenes = genome[1:4]
+        oncogenes = genome[2:5]
         oncogeneCount=np.count_nonzero(oncogenes==20)
         if oncogeneCount == 2:
             Prob = predationRate
@@ -181,7 +191,7 @@ iterations = input("how many cycles of the simulation?? ")
 stats=[]
 for run in range(iterations):
     iters = 10000
-    popCap = 200
+    popCap = 1000
     rateAvg1 = []
     populSize1 = []
     rateStd1 = []
@@ -194,7 +204,7 @@ for run in range(iterations):
         Plane = int(0.5*len(genomes))
         mutate(genomes)
         move(genomes,organismMoveRate)
-        move(predators, 1)
+        move(predators, organismMoveRate)
         predators = predatorLevels(predators)
         child = mate(genomes)
         genomes = procreate(genomes, child)
@@ -203,18 +213,19 @@ for run in range(iterations):
         genomes = popMax(genomes, popCap)
         if len(genomes) <= 1:
             break
-        rateAvg1.append(np.mean(genomes[:,0]))
-        rateStd1.append(np.std(genomes[:,0]))
+        ratesAll = meanRates(genomes[:,0:2])
+        rateAvg1.append(np.mean(ratesAll))
+        rateStd1.append(np.std(ratesAll))
         populSize1.append(len(genomes))
-        if np.std(genomes[:,0]) == 0:
+        if np.std(ratesAll) == 0:
              break
         t1 = time.time()
-        print(run,n,t1-t0, np.mean(genomes[:,0]), len(genomes), len(predators),\
-                np.max(genomes[:,4]))
+        print(run,n,t1-t0, np.mean(ratesAll), np.std(ratesAll), len(genomes), len(predators),\
+                np.max(genomes[:,5]))
 
     spread1 = 0
     if len(genomes) > 1:
-        spread1 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
+        spread1 = [np.min(ratesAll),np.max(ratesAll)]
 
     organismMoveRate = 1
     predationRate = 0.15
@@ -237,18 +248,19 @@ for run in range(iterations):
         genomes = popMax(genomes, popCap)
         if len(genomes) <= 1:
             break
-        rateAvg2.append(np.mean(genomes[:,0]))
-        rateStd2.append(np.std(genomes[:,0]))
+        ratesAll = meanRates(genomes[:,0:2])
+        rateAvg2.append(np.mean(ratesAll))
+        rateStd2.append(np.std(ratesAll))
         populSize2.append(len(genomes))
-        if np.std(genomes[:,0]) == 0:
+        if np.std(ratesAll) == 0:
              break
         t1 = time.time()
-        print(run,n,t1-t0, np.mean(genomes[:,0]), len(genomes),len(predators),\
-                np.max(genomes[:,4]))
+        print(run,n,t1-t0, np.mean(ratesAll), np.std(ratesAll) len(genomes),len(predators),\
+                np.max(genomes[:,5]))
 
     spread2 = 0
     if len(genomes) > 1:
-        spread2 = [np.min(genomes[:,0]),np.max(genomes[:,0])]
+        spread2 = [np.min(ratesAll),np.max(ratesAll)]
 
     stats.append(rateAvg1[len(rateAvg1)-1])
     stats.append(spread1)
