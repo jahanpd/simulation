@@ -130,11 +130,13 @@ def procreate(genomes, children):
     else:
         return genomes
 
-a, b = population(5, Plane)
-print a
-for x in range(100):
-    mutate(a)
-    child = mate(a)
-    print(child)
-    a = procreate(a, child)
-print a
+def diversity(genomes, Plane):
+    replaceNum = int(0.05*len(genomes))
+    genomes[0:replaceNum], blank = population(replaceNum, Plane)
+
+
+
+a, b = population(100, Plane)
+
+for n in np.random.randint(0,high=100,size=5):
+    print(a[n])

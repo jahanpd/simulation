@@ -8,8 +8,8 @@ def exponential(x):
     return int(np.power(1.015, x) + 1)
 
 def population(popSize, Plane):
-    rateGene1 = np.random.randint(1,high=1024, size=(popSize,1))
-    rateGene2 = np.random.randint(1,high=1024, size=(popSize,1))
+    rateGene1 = np.random.randint(1,high=300, size=(popSize,1))
+    rateGene2 = np.random.randint(1,high=300, size=(popSize,1))
     oncogenes = np.full((popSize,3),20,dtype=np.int)
     location = np.random.randint(Plane+1,size=(popSize,2))
     generation = np.zeros((popSize,1), dtype=np.int)
@@ -180,6 +180,11 @@ def popMax(genomes, popMax):
     else:
         return genomes
 
+def diversity(genomes, Plane):
+    replaceNum = int(0.05*len(genomes))
+    for n in np.random.randint(0,high=len(genomes),size=replaceNum):
+        genomes[n], discard = population(1, Plane)
+
 
 # predator population controlled by exp function y = a(b^x)+c where
 # a = 1
@@ -190,13 +195,13 @@ iterations = input("how many cycles of the simulation?? ")
 
 stats=[]
 for run in range(iterations):
-    iters = 10000
+    iters = 3000
     popCap = 1000
     rateAvg1 = []
     populSize1 = []
     rateStd1 = []
     organismMoveRate = 1
-    predationRate = 0.45
+    predationRate = 1
     genomes, predators = population(100,50)
 
     for n in range(iters):
@@ -211,6 +216,8 @@ for run in range(iterations):
         genomes = np.array(filter(cancer, genomes))
         genomes = np.array(filter(kill, genomes))
         genomes = popMax(genomes, popCap)
+        #if n % 10 == 0:
+            #diversity(genomes, Plane)
         if len(genomes) <= 1:
             break
         ratesAll = meanRates(genomes[:,0:2])
@@ -220,7 +227,7 @@ for run in range(iterations):
         if np.std(ratesAll) == 0:
              break
         t1 = time.time()
-        print(run,n,t1-t0, np.mean(ratesAll), np.std(ratesAll), len(genomes), len(predators),\
+        print(run,n,t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)), len(genomes), len(predators),\
                 np.max(genomes[:,5]))
 
     spread1 = 0
@@ -228,7 +235,7 @@ for run in range(iterations):
         spread1 = [np.min(ratesAll),np.max(ratesAll)]
 
     organismMoveRate = 1
-    predationRate = 0.15
+    predationRate = 0.3
     genomes, predators = population(100,50)
     rateAvg2 = []
     populSize2 = []
@@ -246,6 +253,8 @@ for run in range(iterations):
         genomes = np.array(filter(cancer, genomes))
         genomes = np.array(filter(kill, genomes))
         genomes = popMax(genomes, popCap)
+        #if n % 10 == 0:
+        #    diversity(genomes, Plane)
         if len(genomes) <= 1:
             break
         ratesAll = meanRates(genomes[:,0:2])
@@ -255,7 +264,7 @@ for run in range(iterations):
         if np.std(ratesAll) == 0:
              break
         t1 = time.time()
-        print(run,n,t1-t0, np.mean(ratesAll), np.std(ratesAll) len(genomes),len(predators),\
+        print(run,n,t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)), len(genomes),len(predators),\
                 np.max(genomes[:,5]))
 
     spread2 = 0
