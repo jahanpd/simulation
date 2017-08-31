@@ -6,7 +6,7 @@ from predate import predate
 
 def run(Population, Predators, Plane, Predation):
     Dead = []
-    while len(Population) < 100:
+    while len(Population) != 0:
         _Pop = []
         for Genome in Population:
             Rate = int(Genome[0:100], 2)
@@ -26,8 +26,8 @@ def run(Population, Predators, Plane, Predation):
 
         Population = mate(Population, Plane)
         Population, X, Y = move_genome(Population, Plane)
-        Predators = move_predator(Predators, Plane)
         Population, Died = predate(Population, Predators, Predation)
+        Predators = move_predator(Predators, Plane)
         Dead = Dead + Died
         print len(Population)
         print len(Dead)

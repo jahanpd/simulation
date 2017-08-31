@@ -1,15 +1,14 @@
 from random import randint
-from plot import plot
 from run import run
-from threading import Thread
 
 Population = []
 Predators = []
+Food = []
 Plane = 100
 Predation = 1
 
-for n in range(50):
-    Rate = randint(1000, 100000)
+for n in range(100):
+    Rate = randint(1000, 10000)
     Gene = bin(Rate)
     Genome = Gene[2:].zfill(100) + ('0'*100)
     Genome += 'x' + str(randint(0, Plane)).zfill(9)
@@ -21,6 +20,9 @@ for n in range(50):
             str(randint(0, Plane)).zfill(9))
     Predators.append(Genome)
 
-if __name__ == '__main__':
-    Thread(target=run(Population, Predators, Plane, Predation)).start()
-    Thread(target=plot(Population)).start()
+for n in range(50):
+    Location = ('x' + str(randint(0, Plane)).zfill(9) + 'y' +
+            str(randint(0, Plane)).zfill(9))
+    Food.append(Location)
+
+run(Population, Predators, Plane, Predation)
