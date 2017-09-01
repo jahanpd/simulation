@@ -251,7 +251,6 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
         if np.std(ratesAll) == 0:
             break
         t1 = time.time()
-        if n % 10 == 0:
-            print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
-                  len(genomes), len(predators), np.max(genomes[:, 5]))
+        print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
+              len(genomes), len(predators), np.max(genomes[:, 5]))
     return ratesAll, rateAvg, rateStd, populSize

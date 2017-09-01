@@ -138,4 +138,6 @@ def diversity(genomes, Plane):
 
 a, b = population(100, Plane)
 """
-print(exponential(1.03, 100))
+og = np.array([20, 20, 20])
+print(og)
+print(np.count_nonzero(og == 20))
