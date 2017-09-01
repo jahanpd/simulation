@@ -1,4 +1,6 @@
+from random import uniform, randint
 import numpy as np
+import time
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import matrixSim as ms
@@ -6,16 +8,14 @@ import matrixSim as ms
 # runSimulation(iters, organismMoveRate, predCurve, predRate, popStart, high)
 # return ratesAll, rateAvg, rateStd, populSize
 
-cycles = 4
-iters = 6000
-maxRate = 1000
+iterations = input("how many cycles of the simulation?? ")
 
-for run in range(cycles):
+for run in range(iterations):
     ratesAll1, rateAvg1, rateStd1, popSize1, spread1 = \
-        ms.runSimulation(iters, 1, 1.03, 1, 100, maxRate, run)
+        ms.runSimulation(3000, 1, 1.03, 1, 100, 600)
 
     ratesAll2, rateAvg2, rateStd2, popSize2, spread2 = \
-        ms.runSimulation(iters, 1, 1.03, 0.5, 100, maxRate, run)
+        ms.runSimulation(3000, 1, 1.02, 0.5, 100, 600)
 
     highPred = plt.plot(range(len(rateAvg1)), rateAvg1, 'g-', label='high')
     lowPred = plt.plot(range(len(rateAvg2)), rateAvg2, 'r-', label='low')
@@ -31,7 +31,6 @@ for run in range(cycles):
     plt.fill_between(range(len(rateAvg2)), rateAvg2+rateStd2,
                      rateAvg2-rateStd2)
     fig1 = plt.gcf()
-    plt.axis([0, iters, 0, maxRate])
     filename = "plot%s.png" % run
     fig1.savefig(filename)
     plt.close()

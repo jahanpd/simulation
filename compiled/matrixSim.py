@@ -205,7 +205,7 @@ def diversity(genomes, Plane, predCurve, High):
 # b = 1.025
 # c = 1
 
-def runSimulation(iters, OMR, predCurve, predRate, popStart, High):
+def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
     genomes, predators = population(popStart, int(0.5*popStart), predCurve,
                                     High)
     predationRate = predRate
@@ -251,7 +251,7 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High):
         if np.std(ratesAll) == 0:
             break
         t1 = time.time()
-        print(n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
+        print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
               len(genomes), len(predators), np.max(genomes[:, 5]))
     if len(genomes) > 1:
         spread = [np.min(ratesAll), np.max(ratesAll)]
