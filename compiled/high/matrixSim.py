@@ -245,7 +245,8 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
 
         genomes = popMax(genomes, popCap)
         if n % 100 == 0:
-            diversity(genomes, Plane, predCurve, High)
+            if len(genomes) > 0:
+                diversity(genomes, Plane, predCurve, High)
         geno = False
         if len(genomes) <= 1:
             geno = True
