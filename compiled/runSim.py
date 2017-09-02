@@ -7,26 +7,27 @@ import matrixSim as ms
 # return ratesAll, rateAvg, rateStd, populSize
 
 cycles = 1
-iters = 100
-maxRate = 1000
+iters = 1000
+maxRate = 100
 means = []
 
 for run in range(cycles):
-    ratesAll1, rateAvg1, rateStd1, popSize1 = \
-        ms.runSimulation(iters, 1, 1.035, 1, 100, maxRate, run)
+    ratesAll1, rateAvg1, rateStd1, popSize1, geno = \
+        ms.runSimulation(iters, 1, 1.03, 0.5, 100, maxRate, run)
 
-    means.append(np.mean(ratesAll1))
-    statsname = "statsEnd%s.txt" % run
-    statsExport = open(statsname, 'w')
-    for n in ratesAll1:
-        statsExport.write("%s," % n)
-    statsExport.close()
+    if geno is False:
+        means.append(np.mean(ratesAll1))
+        statsname = "statsEnd%s.txt" % run
+        statsExport = open(statsname, 'w')
+        for n in ratesAll1:
+            statsExport.write("%s," % n)
+        statsExport.close()
 
-    statsname = "statsRateAvg%s.txt" % run
-    statsExport = open(statsname, 'w')
-    for n in ratesAll1:
-        statsExport.write("%s," % n)
-    statsExport.close()
+        statsname = "statsRateAvg%s.txt" % run
+        statsExport = open(statsname, 'w')
+        for n in ratesAll1:
+            statsExport.write("%s," % n)
+        statsExport.close()
 
 means = np.array(means)
 n1, bins1, patches1 = plt.hist(means, color='green', alpha=0.4)
