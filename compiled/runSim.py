@@ -7,7 +7,7 @@ import matrixSim as ms
 # return ratesAll, rateAvg, rateStd, populSize
 
 cycles = 1
-iters = 5000
+iters = 100
 maxRate = 1000
 means = []
 

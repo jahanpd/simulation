@@ -35,24 +35,10 @@ def convertInt(gene):
 
 
 def probabality(Prob, ifReturn, elReturn):
-    if Prob >= uniform(0, 1):
+    if Prob <= uniform(0, 1):
         return ifReturn
     else:
         return elReturn
-
-
-def geneSwitch(gene, rate):
-    localRate = rate
-    if localRate == 0:
-        localRate += 1
-    oncogenes = gene[0].zfill(5) + gene[1].zfill(5) + gene[2].zfill(5)
-    Prob = 1./localRate
-    mutate = ""
-    for n in oncogenes:
-        mutate += probabality(Prob, str(randint(0, 1)), n)
-    gene[0] = mutate[:5]
-    gene[1] = mutate[5:10]
-    gene[2] = mutate[10:]
 
 
 def meanRates(rates):
@@ -62,11 +48,25 @@ def meanRates(rates):
     return meanrates
 
 
-def mutate(genomes):
+def mutate(genomes, maxRate):
     rates = meanRates(genomes[:, 0:2])
     oncogenes = genomes[:, 2:5]
     stringConvert = np.vectorize(convertString)
     out = stringConvert(oncogenes)
+
+    def geneSwitch(gene, rate):
+        localRate = rate
+        if localRate == 0:
+            localRate += 1
+        oncogenes = gene[0].zfill(5) + gene[1].zfill(5) + gene[2].zfill(5)
+        Prob = float(rate)/maxRate
+        mutate = ""
+        for n in oncogenes:
+            mutate += probabality(Prob, str(randint(0, 1)), n)
+        gene[0] = mutate[:5]
+        gene[1] = mutate[5:10]
+        gene[2] = mutate[10:]
+
     map(geneSwitch, out, rates)
     intConvert = np.vectorize(convertInt)
     genomes[:, 2:5] = intConvert(out)
@@ -216,7 +216,7 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
     for n in range(iters):
         t0 = time.time()
         Plane = int(0.5*len(genomes))
-        mutate(genomes)
+        mutate(genomes, High)
         move(genomes, OMR, Plane)
         move(predators, OMR, Plane)
         predators = predatorLevels(genomes, predators, predCurve, Plane)
@@ -251,6 +251,7 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
         if np.std(ratesAll) == 0:
             break
         t1 = time.time()
-        print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
-              len(genomes), len(predators), np.max(genomes[:, 5]))
+        if n % 10 == 0:
+            print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
+                  len(genomes), len(predators), np.max(genomes[:, 5]))
     return ratesAll, rateAvg, rateStd, populSize
