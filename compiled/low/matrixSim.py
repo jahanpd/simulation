@@ -171,11 +171,13 @@ def cancer(genome):
         return True
 
 
-def predatorEndangered(predators, predSize, Plane):
+def predatorEndangered(predators, predSize, Plane, genomes):
     _Predators = predators
     while len(_Predators) < predSize:
         newp = np.random.randint(Plane+1, size=(1, 2))
         _Predators = np.vstack([_Predators, newp])
+        if len(_Predators) >= len(genomes):
+            break
     return _Predators
 
 
@@ -184,7 +186,7 @@ def predatorLevels(genomes, predators, predCurve, Plane):
     if len(predators) > predSize:
         return predators[0:predSize]
     elif len(predators) < predSize:
-        muchosPred = predatorEndangered(predators, predSize, Plane)
+        muchosPred = predatorEndangered(predators, predSize, Plane, genomes)
         return muchosPred
     else:
         return predators

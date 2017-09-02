@@ -10,7 +10,7 @@ cycles = 1000
 iters = 1000
 maxRate = 100
 means = []
-doco = 350
+doco = 390
 
 for run in range(cycles):
     ratesAll1, rateAvg1, rateStd1, popSize1, geno = \

@@ -1,7 +1,7 @@
 setwd("~/Documents/Hackz/Simulation/compiled/high")
 
 
-iters <- 145
+iters <- 408
 high <- c()
 for (n in 0:iters) {
   temp <- read.table(paste("statsEnd",n,".txt", sep=""), 
@@ -24,7 +24,7 @@ for (n in 0:iters) {
   low[n] <- mean
 }
 
-hist(high, col=rgb(1,0,0,0.5),breaks=100, xlim = c(40,90), ylim = c(0,25)) # colour is red
+hist(high, col=rgb(1,0,0,0.5),breaks=50, xlim = c(40,90), ylim = c(0,100)) # colour is red
 hist(low, col=rgb(0,0,1,0.5), breaks=25, add=T) # colour is blue
 box()
 

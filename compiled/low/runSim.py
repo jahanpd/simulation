@@ -6,11 +6,11 @@ import matrixSim as ms
 # runSimulation(iters, organismMoveRate, predCurve, predRate, popStart, high)
 # return ratesAll, rateAvg, rateStd, populSize
 
-cycles = 1000
+cycles = 20
 iters = 1000
 maxRate = 100
 means = []
-doco = 0
+doco = 981
 
 for run in range(cycles):
     ratesAll1, rateAvg1, rateStd1, popSize1, geno = \
