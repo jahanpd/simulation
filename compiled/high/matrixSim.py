@@ -243,15 +243,17 @@ def runSimulation(iters, OMR, predCurve, predRate, popStart, High, run):
         if n % 100 == 0:
             diversity(genomes, Plane, predCurve, High)
         if len(genomes) <= 1:
+            print("all dead")
             break
         ratesAll = meanRates(genomes[:, 0:2])
         rateAvg.append(np.mean(ratesAll))
         rateStd.append(np.std(ratesAll))
         populSize.append(len(genomes))
         if np.std(ratesAll) == 0:
+            print("no diversity")
             break
         t1 = time.time()
-        if n % 10 == 0:
-            print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
-                  len(genomes), len(predators), np.max(genomes[:, 5]))
+        # if n % 10 == 0:
+        print(run, n, t1-t0, int(np.mean(ratesAll)), int(np.std(ratesAll)),
+              len(genomes), len(predators), np.max(genomes[:, 5]))
     return ratesAll, rateAvg, rateStd, populSize
