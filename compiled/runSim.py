@@ -25,7 +25,7 @@ for run in range(cycles):
 
         statsname = "statsRateAvg%s.txt" % run
         statsExport = open(statsname, 'w')
-        for n in ratesAll1:
+        for n in rateAvg1:
             statsExport.write("%s," % n)
         statsExport.close()
 
